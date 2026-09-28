@@ -89,6 +89,7 @@ create table "public"."cabinet_state" (
 "id" smallint default 1 not null,
 "cash_balance" numeric(12,2) default 0 not null,
 "telegram" text default ''::text not null,
+"telegram_owner_name" text default ''::text not null,
 "updated_at" timestamp with time zone default now() not null,
 "cabinet_name" text default 'Cabinet Médical de Valentine'::text not null,
 "place" text default 'Valentine · New Hanover'::text not null,
