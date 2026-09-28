@@ -1911,19 +1911,10 @@
   }
 
   function setDataClient(session){
-    if(session?.access_token){
-      db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-        global:{headers:{Authorization:"Bearer "+session.access_token}},
-        auth:{
-          persistSession:false,
-          autoRefreshToken:false,
-          detectSessionInUrl:false,
-          storageKey:"cabinet-valentine-data-client"
-        }
-      });
-    }else{
-      db = sb;
-    }
+    // Un seul client Supabase pour toute l'application.
+    // Créer un nouveau client à chaque vérification de session provoquait
+    // une boucle de requêtes /auth/v1/user et le clignotement de l'interface.
+    db = sb;
   }
 
   const defaults = {
@@ -4904,17 +4895,17 @@ $('navigationSave').addEventListener('click',async()=>{
 
   function applySession(session){
     const nextUser=session?.user||null;
-    const sameApprovedUser=!!(
+    const sameKnownUser=!!(
       nextUser?.id &&
       currentUser?.id===nextUser.id &&
-      currentProfile?.access_status==="approved"
+      currentProfile
     );
 
     setDataClient(session);
 
     // Un simple renouvellement du jeton ne doit jamais reconstruire l'interface :
     // sinon le menu administrateur disparaît/réapparaît et toute la colonne de gauche saute.
-    if(sameApprovedUser){
+    if(sameKnownUser){
       currentUser=nextUser;
       rememberSession(session);
       return;
