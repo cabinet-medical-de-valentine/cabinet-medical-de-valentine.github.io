@@ -1101,6 +1101,149 @@
 #bookEditor .book-editor-identity textarea{min-height:100px}
 .book-editor-identity{margin:16px 0}
 .book-editor-identity summary{cursor:pointer;margin-bottom:12px}
+
+/* === TEST THÈME VALENTINE — 28/09/2026 ===
+   Habillage uniquement. Le carnet de consultations reste inchangé. */
+body{
+  background:
+    radial-gradient(circle at 78% 12%,rgba(176,141,60,.08),transparent 25%),
+    radial-gradient(circle at 18% 18%,rgba(57,85,62,.20),transparent 32%),
+    repeating-linear-gradient(0deg,rgba(255,255,255,.012) 0 1px,transparent 1px 4px),
+    #151812;
+}
+.sidebar{
+  background:
+    linear-gradient(rgba(25,48,34,.96),rgba(17,34,25,.98)),
+    repeating-linear-gradient(90deg,#203b2b 0 5px,#1a3325 5px 11px,#254331 11px 15px);
+  border-right:1px solid rgba(176,141,60,.48);
+  box-shadow:12px 0 34px rgba(0,0,0,.36),inset -1px 0 rgba(234,223,198,.05);
+}
+.brand h1{color:#eadfc6;text-shadow:0 1px 0 #000}
+.brand p{color:#b7ad8d}
+.seal{
+  color:#eadfc6;
+  background:radial-gradient(circle,#6b1f2d 0 43%,#4d1720 44% 51%,#b08d3c 53% 58%,#243f2e 60%);
+  border-color:#c6a354;
+  box-shadow:0 0 0 4px #6b4e37,0 8px 26px rgba(0,0,0,.45),inset 0 0 16px rgba(0,0,0,.38);
+}
+.nav button{color:#d9d1ba}
+.nav button:hover{background:rgba(176,141,60,.11);border-color:rgba(176,141,60,.24);color:#fff7df}
+.nav button.active{
+  background:linear-gradient(90deg,rgba(107,31,45,.88),rgba(36,63,46,.46));
+  border-color:rgba(176,141,60,.55);color:#f4e8c7;
+  box-shadow:inset 3px 0 0 #c6a354;
+}
+.private-nav{border-top-color:rgba(176,141,60,.28)!important}
+.user-box{
+  border-color:rgba(176,141,60,.34);
+  background:rgba(6,18,11,.24);
+}
+.telegram{
+  background:#eadfc6;color:#253429;border-color:#9c7c35;
+  box-shadow:inset 0 0 22px rgba(107,78,55,.17),0 8px 20px rgba(0,0,0,.28);
+}
+.telegram small{color:#6b1f2d}
+.topbar{
+  background:
+    linear-gradient(90deg,rgba(36,63,46,.98),rgba(44,69,52,.94)),
+    repeating-linear-gradient(90deg,#294835 0 8px,#223d2d 8px 15px);
+  border-color:#9c7c35;
+  box-shadow:0 18px 50px rgba(0,0,0,.34);
+}
+.topbar:before,.topbar:after{background:#c6a354}
+.topbar h2{color:#f2e7cc}
+.topbar p,.date-badge{color:#c6b993}
+.date-badge strong{color:#f2e7cc}
+.topbar-bureau-shortcut{
+  background:linear-gradient(180deg,#76283a,#5c1b29);
+  border-color:#b08d3c;color:#f4e8c7;
+}
+.view:not(#consultations) .card{
+  background:
+    linear-gradient(180deg,rgba(234,223,198,.97),rgba(218,203,170,.97));
+  border-color:#9b7a3d;
+  box-shadow:0 12px 28px rgba(0,0,0,.24);
+}
+.view:not(#consultations) .card:before{border-color:rgba(107,78,55,.16)}
+.view:not(#consultations) .card-body{color:#332b20}
+.view:not(#consultations) .section-title{
+  color:#f2e7cc;
+  background:linear-gradient(90deg,#294835,#203a2b);
+  border-bottom-color:#9b7a3d;
+}
+.view:not(#consultations) .section-title small{color:#cfc4a6}
+.view:not(#consultations) .metric{
+  background:linear-gradient(145deg,#efe4c9,#d9c7a1);
+}
+.view:not(#consultations) .metric.accent{
+  background:linear-gradient(145deg,#31543e,#243f2e);
+}
+.view:not(#consultations) .metric .label{color:#695d47}
+.view:not(#consultations) .metric .value{color:#55401f}
+.view:not(#consultations) .metric .sub{color:#766b55}
+.view:not(#consultations) .metric.accent .label,
+.view:not(#consultations) .metric.accent .sub{color:#d0c5aa}
+.view:not(#consultations) .metric.accent .value{color:#f2e7cc}
+.view:not(#consultations) .btn{
+  border-color:#9e7b37;color:#f3e7c9;background:linear-gradient(#76283a,#5c1b29);
+  box-shadow:inset 0 0 0 1px rgba(255,238,196,.10),0 4px 11px rgba(0,0,0,.18);
+}
+.view:not(#consultations) .btn.secondary{background:linear-gradient(#6b4e37,#4f3829);border-color:#8f7148}
+.view:not(#consultations) .btn.ghost{background:transparent;border-color:#8f7148;color:#6a5131}
+.view:not(#consultations) .btn.good{background:linear-gradient(#3f684c,#2d513a);border-color:#718d69}
+.view:not(#consultations) .btn.danger{background:linear-gradient(#7b2938,#5d1e2b);border-color:#9b5461}
+.view:not(#consultations) th{
+  background:#294835;color:#f1e5c7;border-color:#9b7a3d;
+}
+.view:not(#consultations) td{
+  color:#332b20;background:rgba(248,240,219,.72);
+  border-color:rgba(107,78,55,.38);
+}
+.view:not(#consultations) tbody tr:hover td{background:rgba(225,211,180,.88)}
+.view:not(#consultations) .resource-name{color:#3b4c37}
+.view:not(#consultations) .money{color:#6b4e21}
+.view:not(#consultations) .muted{color:#776c56}
+.view:not(#consultations) .pill{background:#e6d9bd;border-color:#a78b57;color:#4f4537}
+.view:not(#consultations) .pill.gold{color:#765a22}
+.view:not(#consultations) .pill.green{color:#3e6648;border-color:#6f8a67}
+.view:not(#consultations) .pill.red{color:#7b2938;border-color:#a26772}
+.view:not(#consultations) .field label{color:#625844}
+.view:not(#consultations) input,
+.view:not(#consultations) select,
+.view:not(#consultations) textarea{
+  background:#f3ead3;color:#2f2a22;border-color:#a58c5c;
+}
+.view:not(#consultations) input:focus,
+.view:not(#consultations) select:focus,
+.view:not(#consultations) textarea:focus{
+  border-color:#3e654b;box-shadow:0 0 0 2px rgba(62,101,75,.14);
+}
+.view:not(#consultations) .warning{
+  border-color:rgba(107,31,45,.48);background:rgba(107,31,45,.10);color:#6d2935;
+}
+.view:not(#consultations) .empty{color:#756b57}
+.view:not(#consultations) hr.sep{border-top-color:rgba(107,78,55,.22)}
+.view:not(#consultations) .progress{background:#d8c9a9;border-color:#927744}
+.view:not(#consultations) .progress span{background:linear-gradient(90deg,#3b6349,#b08d3c)}
+.view:not(#consultations) .progress span.short{background:linear-gradient(90deg,#6b1f2d,#a84a5b)}
+.view:not(#consultations) .recipe-note,
+.view:not(#consultations) .craft-stock-box{
+  background:rgba(176,141,60,.10);border-color:rgba(176,141,60,.45);color:#564b38;
+}
+.view:not(#consultations) .craft-stock-box span{color:#74684f}
+.view:not(#consultations) .craft-stock-box strong{color:#3f5b45}
+.view:not(#consultations) .stock-low{background:rgba(107,31,45,.10)!important}
+.footer{color:#80755e}
+.auth-gate{
+  background:
+    radial-gradient(circle at 50% 18%,rgba(36,63,46,.44),transparent 40%),
+    rgba(12,16,12,.97);
+}
+.auth-card{
+  background:linear-gradient(180deg,#294835,#1e3528);
+  border-color:#b08d3c;
+}
+.auth-card h2{color:#efe3c5}.auth-card p{color:#c6b993}
 </style>
 </head>
 <body class="locked" data-site-version="2026-09-21-1806">
