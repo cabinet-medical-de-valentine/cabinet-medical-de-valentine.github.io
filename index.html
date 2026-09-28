@@ -1911,10 +1911,19 @@
   }
 
   function setDataClient(session){
-    // Un seul client Supabase pour toute l'application.
-    // Créer un nouveau client à chaque vérification de session provoquait
-    // une boucle de requêtes /auth/v1/user et le clignotement de l'interface.
-    db = sb;
+    if(session?.access_token){
+      db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+        global:{headers:{Authorization:"Bearer "+session.access_token}},
+        auth:{
+          persistSession:false,
+          autoRefreshToken:false,
+          detectSessionInUrl:false,
+          storageKey:"cabinet-valentine-data-client"
+        }
+      });
+    }else{
+      db = sb;
+    }
   }
 
   const defaults = {
@@ -4774,7 +4783,6 @@ $('navigationSave').addEventListener('click',async()=>{
     if(error)$("authMessage").textContent=error.message;
     else{
       rememberSession(data?.session);
-      applySession(data?.session||null);
       $("authMessage").textContent="";
     }
   }
@@ -4783,29 +4791,16 @@ $('navigationSave').addEventListener('click',async()=>{
     if(displayName.length<2){$("authMessage").textContent="Choisis d'abord ton nom affiché / nom RP.";return;}
     if(!email||password.length<6){$("authMessage").textContent="Entre un e-mail et un mot de passe d'au moins 6 caractères.";return;}
     $("authMessage").textContent="Création du compte…";
-    try{
-      const response=await fetch(SUPABASE_URL+"/functions/v1/signup-user",{
-        method:"POST",
-        headers:{"apikey":SUPABASE_KEY,"Content-Type":"application/json"},
-        body:JSON.stringify({display_name:displayName,email,password})
-      });
-      const payload=await response.json().catch(()=>({}));
-      if(!response.ok)throw new Error(payload?.error||"Impossible de créer le compte.");
-      const {data,error}=await sb.auth.signInWithPassword({email,password});
-      if(error)throw error;
-      rememberSession(data?.session);
-      applySession(data?.session||null);
-      $("authMessage").textContent="Compte créé sous le nom « "+displayName+" ». Ton accès est maintenant en attente d’autorisation.";
-    }catch(error){
-      $("authMessage").textContent=error?.message||"Impossible de créer le compte.";
-    }
+    const {data,error}=await sb.auth.signUp({email,password,options:{data:{display_name:displayName}}});
+    if(error)$("authMessage").textContent=error.message;
+    else if(!data.session)$("authMessage").textContent="Compte créé sous le nom « "+displayName+" ». Vérifie l'e-mail de confirmation, puis reconnecte-toi. Ton accès devra ensuite être autorisé par l’administrateur.";
+    else $("authMessage").textContent="Compte créé sous le nom « "+displayName+" ». Ton accès est maintenant en attente d’autorisation.";
   }
   $("authLogin").addEventListener("click",signIn);$("authSignup").addEventListener("click",signUp);
   $("authPassword").addEventListener("keydown",e=>{if(e.key==="Enter")signIn();});
   async function logout(){
     rememberSession(null);
     await sb.auth.signOut();
-    applySession(null);
   }
   $("logoutBtn").addEventListener("click",logout);
   $("accessLogoutBtn").addEventListener("click",logout);
@@ -4898,17 +4893,17 @@ $('navigationSave').addEventListener('click',async()=>{
 
   function applySession(session){
     const nextUser=session?.user||null;
-    const sameKnownUser=!!(
+    const sameApprovedUser=!!(
       nextUser?.id &&
       currentUser?.id===nextUser.id &&
-      currentProfile
+      currentProfile?.access_status==="approved"
     );
 
     setDataClient(session);
 
     // Un simple renouvellement du jeton ne doit jamais reconstruire l'interface :
     // sinon le menu administrateur disparaît/réapparaît et toute la colonne de gauche saute.
-    if(sameKnownUser){
+    if(sameApprovedUser){
       currentUser=nextUser;
       rememberSession(session);
       return;
@@ -4947,18 +4942,95 @@ $('navigationSave').addEventListener('click',async()=>{
       setSync("Hors ligne","bad");
     }
   }
-  // Initialisation de session volontairement simple :
-  // une seule lecture au chargement. Les contrôles suivants ne tournent
-  // qu'au rythme prévu par refreshTimer (20 s), pas à chaque événement auth.
-  const initialAuth=await sb.auth.getSession();
-  if(initialAuth.error)console.warn("Lecture de session :",initialAuth.error);
-  const initialSession=initialAuth.data?.session||null;
-  if(initialSession){
-    rememberSession(initialSession);
-    applySession(initialSession);
-  }else{
-    applySession(null);
+  async function wakeSession(){
+    if(!currentUser)return;
+    const session=await ensureFreshSession(true);
+    if(session){
+      const ok=await checkAccess(true);
+      if(ok){
+        $("accessGate").classList.add("hidden");
+        document.body.classList.remove("locked");
+        setSync("En ligne · synchronisé","ok");
+      }
+    }
   }
+
+  window.addEventListener("focus",wakeSession);
+  document.addEventListener("visibilitychange",()=>{
+    if(document.visibilityState==="visible")wakeSession();
+  });
+
+  let authBootDone=false;
+
+  async function restoreAuthFromBackup(){
+    const backup=readRememberedSession();
+    if(!backup){
+      applySession(null);
+      return;
+    }
+    const {data,error}=await sb.auth.setSession({
+      access_token:backup.access_token,
+      refresh_token:backup.refresh_token
+    });
+    if(error){
+      console.warn("Restauration de la connexion :",error);
+      rememberSession(null);
+      applySession(null);
+      return;
+    }
+    const restored=data?.session||null;
+    rememberSession(restored);
+    applySession(restored);
+  }
+
+  sb.auth.onAuthStateChange((event,nextSession)=>{
+    if(event==="INITIAL_SESSION"){
+      authBootDone=true;
+      if(nextSession){
+        rememberSession(nextSession);
+        applySession(nextSession);
+      }else{
+        setTimeout(()=>restoreAuthFromBackup(),0);
+      }
+      return;
+    }
+
+    if(event==="TOKEN_REFRESHED"){
+      if(nextSession){
+        rememberSession(nextSession);
+        setDataClient(nextSession);
+        currentUser=nextSession.user||currentUser;
+      }
+      return;
+    }
+
+    if(event==="SIGNED_OUT"){
+      // Ne pas effacer la sauvegarde pendant l'initialisation d'un F5 :
+      // seul le bouton de déconnexion appelle rememberSession(null).
+      if(authBootDone)applySession(null);
+      return;
+    }
+
+    if(nextSession){
+      rememberSession(nextSession);
+      applySession(nextSession);
+    }
+  });
+
+  // Filet de sécurité si le navigateur ne déclenche pas INITIAL_SESSION.
+  setTimeout(async()=>{
+    if(authBootDone)return;
+    const {data:{session},error}=await sb.auth.getSession();
+    if(error)console.warn("Lecture de session :",error);
+    if(session){
+      authBootDone=true;
+      rememberSession(session);
+      applySession(session);
+    }else{
+      authBootDone=true;
+      await restoreAuthFromBackup();
+    }
+  },1200);
 
   $("todayLabel").textContent=new Intl.DateTimeFormat("fr-FR",{day:"2-digit",month:"long",year:"numeric"}).format(new Date());
   $("mvDate").value=todayISO();
