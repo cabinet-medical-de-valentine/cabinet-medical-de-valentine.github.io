@@ -1773,6 +1773,7 @@
           <h3 class="section-title">Identité du cabinet</h3>
           <div class="card-body">
             <div class="field"><label>Nom du cabinet</label><input id="settingName"></div>
+            <div class="field" style="margin-top:14px"><label for="settingOwnerName">Nom sur le panneau blanc</label><input id="settingOwnerName" maxlength="80" placeholder="Nom du responsable"></div>
             <div class="form-grid" style="margin-top:14px">
               <div class="field"><label>Ville / région</label><input id="settingPlace"></div>
               <div class="field"><label>Télégramme</label><input id="settingTelegram"></div>
@@ -1791,7 +1792,7 @@
               <label class="btn ghost" style="display:inline-flex;align-items:center">Importer une sauvegarde<input type="file" id="importData" accept=".json" hidden></label>
             </div>
             <div class="warning">
-              Cette version est reliée à la base en ligne du Cabinet-Valentine. Seuls les comptes autorisés par l’administrateur peuvent accéder aux données.
+              Cette version est reliée à la base en ligne du Cabinet de Valentine. Seuls les comptes autorisés par l’administrateur peuvent accéder aux données.
             </div>
             <hr class="sep">
             <button class="btn danger admin-only" id="resetAll">Réinitialiser toutes les données</button>
@@ -1927,7 +1928,7 @@
   }
 
   const defaults = {
-    settings:{name:"Cabinet Médical de Valentine",place:"Valentine · New Hanover",telegram:"",giphyApiKey:""},
+    settings:{ownerName:"",name:"Cabinet Médical de Valentine",place:"Valentine · New Hanover",telegram:"",giphyApiKey:""},
     cash:0,resources:[],recipes:[],fabricationPlans:[],suppliers:[],orders:[],pricing:[],history:[]
   };
   let state = JSON.parse(JSON.stringify(defaults));
@@ -2722,7 +2723,7 @@ $('navigationSave').addEventListener('click',async()=>{
       for(const r of [cab,resources,recipes,ingredients,fabricationPlans,suppliers,orders,pricing,movements,pharmacy]) if(r.error) throw r.error;
 
       const c=cab.data||{};
-      state.settings={name:c.cabinet_name||defaults.settings.name,place:c.place||defaults.settings.place,telegram:c.telegram||"",giphyApiKey:c.giphy_api_key||""};
+      state.settings={ownerName:c.telegram_owner_name??"",name:c.cabinet_name||defaults.settings.name,place:c.place||defaults.settings.place,telegram:c.telegram||"",giphyApiKey:c.giphy_api_key||""};
       state.cash=num(c.cash_balance);
       state.resources=(resources.data||[]).map(r=>({
         id:r.id,name:r.name,stock:num(r.stock),unitPrice:num(r.unit_price),kind:r.category==="ingredient"?"ingredient":"soin",active:r.active!==false
@@ -3806,8 +3807,8 @@ $('navigationSave').addEventListener('click',async()=>{
   }
 
   function renderSettings(){
-    $("settingName").value=state.settings.name||"";$("settingPlace").value=state.settings.place||"";$("settingTelegram").value=state.settings.telegram||"";$("settingCash").value=num(state.cash).toFixed(2);$("telegramPlaque").textContent=state.settings.telegram||"—";
-    if($("telegramOwnerName"))$("telegramOwnerName").textContent="CABINET DE VALENTINE";
+    $("settingOwnerName").value=state.settings.ownerName??"";$("settingName").value=state.settings.name||"";$("settingPlace").value=state.settings.place||"";$("settingTelegram").value=state.settings.telegram||"";$("settingCash").value=num(state.cash).toFixed(2);$("telegramPlaque").textContent=state.settings.telegram||"—";
+    if($("telegramOwnerName"))$("telegramOwnerName").textContent=(state.settings.ownerName??"").toLocaleUpperCase("fr-FR");
     document.querySelector(".brand h1").innerHTML=esc(state.settings.name).replace(/\sde\sValentine/i,"<br>de Valentine");
     document.querySelector(".brand p").textContent=state.settings.place;
   }
@@ -4701,7 +4702,7 @@ $('navigationSave').addEventListener('click',async()=>{
   ["historySearch","historyType","historyMonth"].forEach(id=>$(id).addEventListener(id==="historySearch"?"input":"change",renderHistory));
   $("clearHistoryFilters").addEventListener("click",()=>{$("historySearch").value="";$("historyType").value="";$("historyMonth").value="";renderHistory();});
   $("saveSettings").addEventListener("click",async()=>{
-    const payload={cabinet_name:$("settingName").value.trim()||defaults.settings.name,place:$("settingPlace").value.trim()||defaults.settings.place,telegram:$("settingTelegram").value.trim(),cash_balance:Math.max(0,num($("settingCash").value))};
+    const payload={telegram_owner_name:$("settingOwnerName").value.trim(),cabinet_name:$("settingName").value.trim()||defaults.settings.name,place:$("settingPlace").value.trim()||defaults.settings.place,telegram:$("settingTelegram").value.trim(),cash_balance:Math.max(0,num($("settingCash").value))};
     try{const {error}=await db.from("cabinet_state").update(payload).eq("id",1);if(error)throw error;await loadRemoteState();toast("Paramètres enregistrés en ligne.");}catch(err){dbError(err);}
   });
   $("exportData").addEventListener("click",()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="cabinet-valentine-sauvegarde-"+todayISO()+".json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);});
