@@ -1377,6 +1377,279 @@ main{
   .valentine-hero blockquote{display:none}
   #dashboard .grid.cards,#dashboard .dashboard-three{grid-template-columns:1fr}
 }
+
+/* === VALENTINE MOCKUP V3 — reconstruction fidèle du visuel de référence === */
+:root{
+  --val-green:#17362a;
+  --val-green-2:#214936;
+  --val-green-3:#2b5a43;
+  --val-wood:#5b3b27;
+  --val-wood-dark:#2c1b12;
+  --val-paper:#e9dcc0;
+  --val-paper-2:#f3e7cc;
+  --val-brass:#b58d45;
+  --val-brass-light:#d2b16c;
+  --val-burgundy:#6b1f2d;
+}
+body{
+  background:
+    linear-gradient(rgba(26,15,9,.22),rgba(26,15,9,.22)),
+    repeating-linear-gradient(90deg,#4b2a19 0 7px,#5d3420 7px 14px,#3b2115 14px 20px);
+}
+.valentine-masthead{
+  width:min(1448px,100%);
+  height:150px;
+  margin:0 auto;
+  position:relative;
+  display:flex;
+  align-items:center;
+  padding:18px 42px;
+  overflow:hidden;
+  color:#efe0bd;
+  border-left:10px solid #2d1a10;
+  border-right:10px solid #2d1a10;
+  border-top:8px solid #2d1a10;
+  background:
+    linear-gradient(90deg,rgba(23,14,9,.92) 0 43%,rgba(51,56,45,.25) 58%,rgba(232,220,188,.38) 100%),
+    radial-gradient(ellipse at 77% 18%,#ddd0ad 0 10%,transparent 11%),
+    linear-gradient(160deg,transparent 0 52%,#4b574b 53% 58%,transparent 59%),
+    linear-gradient(205deg,transparent 0 47%,#657065 48% 54%,transparent 55%),
+    linear-gradient(#aab2a5 0 40%,#6f7c6d 40% 48%,#34493a 49% 66%,#24372a 67% 100%);
+  box-shadow:0 8px 22px rgba(0,0,0,.38);
+}
+.valentine-masthead:before{
+  content:"";
+  position:absolute;inset:0;
+  background:
+    repeating-linear-gradient(90deg,rgba(255,255,255,.018) 0 1px,transparent 1px 4px),
+    linear-gradient(90deg,rgba(62,32,17,.35),transparent 40%);
+  pointer-events:none;
+}
+.valentine-masthead-emblem{
+  position:relative;z-index:2;
+  width:74px;height:74px;flex:0 0 74px;
+  display:grid;place-items:center;
+  margin-right:18px;
+  color:#d5ad5c;font-size:40px;
+  border:2px solid #b98f45;
+  border-radius:50%;
+  background:radial-gradient(circle,#6b1f2d 0 43%,#2d1b15 44% 62%,#1a120d 63%);
+  box-shadow:0 0 0 5px rgba(181,141,69,.18);
+}
+.valentine-masthead-copy{position:relative;z-index:2;display:flex;flex-direction:column;line-height:.92;text-shadow:0 2px 2px #000}
+.valentine-masthead-copy strong{font-size:39px;letter-spacing:2px}
+.valentine-masthead-copy span{font-size:29px;letter-spacing:4px;text-align:center;margin-top:8px}
+.valentine-masthead-copy small{font-size:10px;letter-spacing:3px;text-align:center;margin-top:14px;color:#cdb78e}
+.valentine-masthead-scene{
+  margin-left:auto;position:relative;z-index:2;
+  align-self:stretch;display:flex;justify-content:center;flex-direction:column;align-items:center;
+  padding-right:26px;color:#463a2d;text-shadow:0 1px rgba(255,255,255,.25);
+}
+.valentine-masthead-scene span{font-size:33px;font-style:italic;transform:rotate(-4deg)}
+.valentine-masthead-scene small{font-size:12px;font-style:italic;margin-top:4px}
+.app{
+  width:min(1370px,calc(100% - 34px));
+  min-height:calc(100vh - 150px);
+  margin:0 auto 28px;
+  grid-template-columns:265px minmax(0,1fr)!important;
+  border:10px solid #2d1a10;
+  border-top:0;
+  box-shadow:0 18px 50px rgba(0,0,0,.48);
+  background:#26180f;
+}
+.sidebar{
+  position:sticky;top:0;
+  height:100vh;
+  padding:22px 18px;
+  background:
+    linear-gradient(rgba(15,46,33,.97),rgba(11,34,25,.99)),
+    repeating-linear-gradient(90deg,rgba(255,255,255,.012) 0 1px,transparent 1px 4px);
+  border-right:1px solid rgba(181,141,69,.52);
+}
+.brand{padding:0 4px 18px;margin-bottom:14px;border-bottom:1px solid rgba(181,141,69,.25)}
+.brand .seal{width:60px;height:60px;font-size:31px;margin-bottom:10px}
+.brand h1{font-size:18px;line-height:1.05;color:#f1e4c5}
+.brand p{font-size:10px;color:#c7b384}
+.nav button{
+  min-height:45px;
+  padding:11px 10px 11px 42px;
+  color:#e7dcc4;
+  font-size:14px;
+  border-radius:2px;
+}
+.nav button.active{
+  background:linear-gradient(90deg,rgba(181,141,69,.18),rgba(39,78,56,.50));
+  border:1px solid rgba(181,141,69,.45);
+  border-left:4px solid var(--val-brass-light);
+  box-shadow:none;
+}
+.nav button:hover{background:rgba(181,141,69,.10);border-color:rgba(181,141,69,.26)}
+main{
+  min-width:0;
+  padding:14px 14px 34px;
+  color:#332819;
+  background:
+    linear-gradient(rgba(237,224,195,.96),rgba(230,216,185,.96)),
+    repeating-linear-gradient(0deg,rgba(91,59,39,.04) 0 1px,transparent 1px 4px);
+}
+.topbar{
+  min-height:72px;
+  margin:0 0 12px;
+  padding:12px 18px;
+  background:linear-gradient(90deg,#17362a,#1f4634 62%,#17382b);
+  border:1px solid #8d7039;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.03),0 6px 14px rgba(0,0,0,.18);
+}
+.valentine-search-shell{
+  width:340px;height:38px;display:flex;align-items:center;gap:10px;
+  padding:0 13px;border:1px solid rgba(221,205,167,.24);border-radius:4px;
+  color:#aeb8aa;background:rgba(255,255,255,.035);font-size:13px;
+}
+.valentine-search-shell span:first-child{font-size:23px;color:#cdb47a;line-height:1}
+.visually-hidden-title,.visually-hidden-subtitle{display:none!important}
+.topbar-bureau-shortcut{
+  min-width:220px;padding:10px 28px;
+  background:linear-gradient(#7a2638,#5f1d2c);
+  border-color:#b38b45;
+  color:#f4e8ca;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.06),0 3px 8px rgba(0,0,0,.22);
+}
+.date-badge{color:#cfbf99;font-size:11px}
+.date-badge strong{color:#f0e3c4;font-size:17px}
+.valentine-hero{
+  min-height:185px;
+  margin:0 0 12px;
+  padding:28px 28px;
+  border:1px solid #9b7c3d;
+  border-radius:4px;
+  overflow:hidden;
+  background:
+    linear-gradient(90deg,rgba(8,25,17,.86) 0%,rgba(12,32,22,.54) 47%,rgba(25,38,28,.10) 100%),
+    radial-gradient(circle at 75% 26%,rgba(235,225,195,.50),transparent 16%),
+    linear-gradient(150deg,transparent 0 44%,#606c60 45% 50%,transparent 51%),
+    linear-gradient(215deg,transparent 0 41%,#7b8479 42% 47%,transparent 48%),
+    linear-gradient(180deg,#aeb7aa 0 31%,#697568 32% 45%,#384b3d 46% 67%,#203326 68% 100%);
+  box-shadow:0 5px 14px rgba(0,0,0,.20);
+}
+.valentine-hero:before{
+  opacity:.92;
+  background:
+    linear-gradient(160deg,transparent 0 41%,#415145 41% 46%,transparent 47%),
+    linear-gradient(215deg,transparent 0 44%,#536255 45% 51%,transparent 52%),
+    linear-gradient(145deg,transparent 0 51%,#334438 51% 56%,transparent 57%);
+  clip-path:none;
+}
+.valentine-hero:after{
+  height:44%;
+  opacity:.90;
+  background:
+    repeating-linear-gradient(90deg,rgba(13,40,25,.92) 0 4px,transparent 4px 18px),
+    linear-gradient(#1f3a2a,#14291d);
+  clip-path:polygon(0 65%,4% 35%,8% 69%,13% 24%,18% 72%,23% 35%,29% 71%,34% 18%,39% 72%,46% 30%,52% 70%,58% 35%,64% 66%,70% 20%,76% 70%,82% 28%,88% 64%,94% 20%,100% 60%,100% 100%,0 100%);
+}
+.valentine-hero-copy{max-width:62%}
+.valentine-hero-copy span{color:#ddc37d;font-size:17px}
+.valentine-hero-copy h3{font-size:38px;color:#fff8e8}
+.valentine-hero-copy p{font-size:15px;color:#e4dbc7}
+.valentine-hero blockquote{
+  width:min(320px,34%);
+  padding:16px 18px;
+  background:rgba(239,226,197,.94);
+  color:#5d4b38;
+  border:1px solid rgba(92,64,39,.35);
+  box-shadow:0 5px 13px rgba(0,0,0,.20);
+}
+#dashboard .grid.cards{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:10px;
+}
+#dashboard .metric{
+  min-height:112px;
+  padding:16px 12px 14px 66px;
+  background:
+    linear-gradient(rgba(243,231,204,.96),rgba(233,217,180,.96)),
+    repeating-linear-gradient(0deg,rgba(91,59,39,.025) 0 1px,transparent 1px 4px);
+  border:1px solid rgba(137,105,50,.42);
+  box-shadow:0 4px 10px rgba(0,0,0,.10);
+}
+#dashboard .metric.accent{
+  background:linear-gradient(145deg,#355c45,#274b37);
+}
+#dashboard .metric:after{
+  width:40px;height:40px;left:14px;
+  background:rgba(181,141,69,.15);
+  border-color:rgba(181,141,69,.38);
+  color:#6d522b;font-size:19px;
+}
+#dashboard .metric .label{font-size:11px;letter-spacing:.5px;text-transform:none;color:#574b38}
+#dashboard .metric .value{font-size:25px;color:#4e3920;margin-top:7px}
+#dashboard .metric .sub{font-size:11px;color:#6f6350}
+#dashboard .metric.accent .label,#dashboard .metric.accent .sub{color:#d8cfb8}
+#dashboard .metric.accent .value{color:#f3e7ca}
+#dashboard .dashboard-three{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:10px;
+  margin-top:10px;
+}
+#dashboard .dashboard-three .pricing-card{
+  grid-column:1 / -1;
+  margin-top:0;
+}
+#dashboard .card{
+  border:1px solid rgba(137,105,50,.42);
+  background:
+    linear-gradient(rgba(243,231,204,.96),rgba(233,217,180,.96)),
+    repeating-linear-gradient(0deg,rgba(91,59,39,.025) 0 1px,transparent 1px 4px);
+  color:#332819;
+  box-shadow:0 4px 12px rgba(0,0,0,.11);
+}
+#dashboard .section-title{
+  min-height:46px;
+  padding:12px 14px;
+  background:linear-gradient(90deg,#1d4331,#26543d);
+  border-bottom:1px solid #8c6f39;
+  color:#f1e5c8;
+  font-size:16px;
+}
+#dashboard .section-title small{color:#c9bb98}
+#dashboard .card-body{color:#332819}
+#dashboard .muted{color:#766a54}
+#dashboard table{color:#332819}
+#dashboard th{background:#214b36;color:#f0e4c4;border-color:#9a7b3e}
+#dashboard td{background:rgba(246,236,212,.78);color:#332819;border-color:rgba(103,78,49,.28)}
+#dashboard input,#dashboard select,#dashboard textarea{
+  background:#f5ead0;color:#34291a;border-color:#a68b56;
+}
+#dashboard .btn{background:linear-gradient(#742537,#5e1e2d);border-color:#a77f40;color:#f1e4c5}
+#dashboard .btn.good{background:linear-gradient(#3d694c,#2f573f);border-color:#6f8d69}
+#dashboard .btn.secondary{background:linear-gradient(#6a4b34,#4e3627)}
+#dashboard .btn.ghost{color:#5c4a31;border-color:#8f7345}
+#dashboard .orders-payment-summary{
+  background:linear-gradient(90deg,rgba(107,31,45,.18),rgba(107,78,55,.10));
+  border-color:rgba(103,78,49,.28);
+}
+#dashboard .smoke-table td,#dashboard .pricing-table td{background:rgba(248,239,216,.74)}
+@media(max-width:1100px){
+  .valentine-masthead{height:120px;padding:14px 22px}
+  .valentine-masthead-copy strong{font-size:30px}
+  .valentine-masthead-copy span{font-size:22px}
+  .valentine-masthead-scene{display:none}
+  .app{width:100%;border-left:0;border-right:0}
+  #dashboard .grid.cards{grid-template-columns:repeat(2,1fr)}
+  #dashboard .dashboard-three{grid-template-columns:1fr 1fr}
+  #dashboard .dashboard-three .pricing-card{grid-column:1/-1}
+}
+@media(max-width:850px){
+  .valentine-masthead{display:none}
+  .app{grid-template-columns:1fr!important;margin:0;border:0;width:100%}
+  .sidebar{height:auto;position:relative}
+  .valentine-search-shell{display:none}
+  .valentine-hero-copy{max-width:100%}
+  .valentine-hero blockquote{display:none}
+  #dashboard .grid.cards,#dashboard .dashboard-three{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body class="locked" data-site-version="2026-09-21-1806">
@@ -1405,6 +1678,20 @@ main{
       <button class="btn danger" id="accessLogoutBtn" type="button">Se déconnecter</button>
     </div>
     <div class="auth-message" id="accessMessage"></div>
+  </div>
+</div>
+
+
+<div class="valentine-masthead" aria-hidden="true">
+  <div class="valentine-masthead-emblem">⚕</div>
+  <div class="valentine-masthead-copy">
+    <strong>CABINET MÉDICAL</strong>
+    <span>DE VALENTINE</span>
+    <small>EST. 1889 · SOINS · CONFIANCE · COMMUNAUTÉ</small>
+  </div>
+  <div class="valentine-masthead-scene">
+    <span>Valentine</span>
+    <small>Territoire du Heartland · depuis 1889</small>
   </div>
 </div>
 
@@ -1459,10 +1746,9 @@ main{
 
   <main>
     <header class="topbar">
-      <div>
-        <h2 id="pageTitle">Tableau de bord</h2>
-        <p>Registre du cabinet · gestion du stock et des dépenses</p>
-      </div>
+      <div class="valentine-search-shell" aria-hidden="true"><span>⌕</span><span>Rechercher dans le registre...</span></div>
+      <h2 id="pageTitle" class="visually-hidden-title">Tableau de bord</h2>
+      <p class="visually-hidden-subtitle">Registre du cabinet · gestion du stock et des dépenses</p>
       <button class="topbar-bureau-shortcut" type="button" data-goto="bureau"><span>✉</span> LE BUREAU</button>
       <div class="date-badge">
         Registre ouvert le
