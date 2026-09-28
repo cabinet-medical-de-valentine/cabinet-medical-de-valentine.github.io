@@ -3686,13 +3686,15 @@ $('navigationSave').addEventListener('click',async()=>{
     const uniqueProducts=list=>[...new Set(list.map(s=>res(s.resourceId)?.name).filter(Boolean))]
       .sort((a,b)=>a.localeCompare(b,"fr-FR",{sensitivity:"base"}));
     const fixedPlaces=supplierPlaceNames();
-    const hasUnassigned=state.suppliers.some(s=>s.resourceId&&!(s.place||"").trim());
+    // Les lignes temporaires créées pour les ingrédients sans fournisseur ne doivent
+    // pas apparaître comme un faux bloc "Lieu non renseigné".
+    const hasUnassigned=state.suppliers.some(s=>s.dbId&&s.resourceId&&!(s.place||"").trim());
     const places=hasUnassigned?[...fixedPlaces,"Lieu non renseigné"]:fixedPlaces;
 
     $("suppliersBody").innerHTML=places.map(place=>{
       const atPlace=state.suppliers.filter(s=>s.resourceId)
         .filter(s=>place==="Lieu non renseigné"
-          ? !(s.place||"").trim()
+          ? (s.dbId&&!(s.place||"").trim())
           : (s.place||"").trim()===place)
         .sort((a,b)=>String(res(a.resourceId)?.name||"").localeCompare(String(res(b.resourceId)?.name||""),"fr-FR",{sensitivity:"base"}));
       const products=uniqueProducts(atPlace);
