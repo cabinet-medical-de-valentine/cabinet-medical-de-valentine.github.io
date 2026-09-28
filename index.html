@@ -4791,10 +4791,21 @@ $('navigationSave').addEventListener('click',async()=>{
     if(displayName.length<2){$("authMessage").textContent="Choisis d'abord ton nom affiché / nom RP.";return;}
     if(!email||password.length<6){$("authMessage").textContent="Entre un e-mail et un mot de passe d'au moins 6 caractères.";return;}
     $("authMessage").textContent="Création du compte…";
-    const {data,error}=await sb.auth.signUp({email,password,options:{emailRedirectTo:window.location.origin+window.location.pathname,data:{display_name:displayName}}});
-    if(error)$("authMessage").textContent=error.message;
-    else if(!data.session)$("authMessage").textContent="Compte créé sous le nom « "+displayName+" ». Vérifie l'e-mail de confirmation, puis reconnecte-toi. Ton accès devra ensuite être autorisé par l’administrateur.";
-    else $("authMessage").textContent="Compte créé sous le nom « "+displayName+" ». Ton accès est maintenant en attente d’autorisation.";
+    try{
+      const response=await fetch(SUPABASE_URL+"/functions/v1/signup-user",{
+        method:"POST",
+        headers:{"apikey":SUPABASE_KEY,"Content-Type":"application/json"},
+        body:JSON.stringify({display_name:displayName,email,password})
+      });
+      const payload=await response.json().catch(()=>({}));
+      if(!response.ok)throw new Error(payload?.error||"Impossible de créer le compte.");
+      const {data,error}=await sb.auth.signInWithPassword({email,password});
+      if(error)throw error;
+      rememberSession(data?.session);
+      $("authMessage").textContent="Compte créé sous le nom « "+displayName+" ». Ton accès est maintenant en attente d’autorisation.";
+    }catch(error){
+      $("authMessage").textContent=error?.message||"Impossible de créer le compte.";
+    }
   }
   $("authLogin").addEventListener("click",signIn);$("authSignup").addEventListener("click",signUp);
   $("authPassword").addEventListener("keydown",e=>{if(e.key==="Enter")signIn();});
