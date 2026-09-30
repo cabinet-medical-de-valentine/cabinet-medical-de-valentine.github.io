@@ -1103,6 +1103,15 @@
 .book-editor-identity summary{cursor:pointer;margin-bottom:12px}
 
 </style>
+
+<style id="book-report-order">
+.book-index-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px;align-items:center}
+.book-index-row .book-tab{min-width:0;overflow-wrap:anywhere;padding-right:5px}
+.book-report-moves{display:flex;gap:3px;padding-right:2px;color:#d8b86a}
+.book-report-move{display:inline-flex;align-items:center;justify-content:center;width:24px;height:28px;padding:0;border:1px solid currentColor;border-radius:4px;background:transparent;color:inherit;font:700 18px/1 Georgia,serif;cursor:pointer}
+.book-report-move:hover:not(:disabled),.book-report-move:focus-visible{background:#d8b86a26;outline:1px solid currentColor;outline-offset:1px}
+.book-report-move:disabled{opacity:.3;cursor:default}
+</style>
 </head>
 <body class="locked" data-site-version="2026-09-21-1806">
 
@@ -2222,7 +2231,7 @@
 // Cabinet de Valentine — chaque utilisateur possède son propre carnet, créé depuis le modèle de base.
 const isBookSupervisor=()=>!!currentUser && isAdmin;
 const canEditBook=()=>!!currentUser && currentProfile?.access_status==="approved";
-let bookCategories=[],bookReports=[],bookPage=-1,bookBusy=false,bookLoaded=false;
+let bookCategories=[],bookReports=[],bookPage=-1,bookBusy=false,bookLoaded=false,bookOrderSaving=false;
 const bookOath=[
 "Au moment d'être admis à exercer la médecine, je promets et je jure d'être fidèle aux lois de l'honneur et de la probité.",
 "Mon premier souci sera de rétablir, de préserver ou de promouvoir la santé dans tous ses éléments, physiques et mentaux, individuels et sociaux.",
@@ -2238,12 +2247,21 @@ const bookOath=[
 "Que les hommes et mes confrères m'accordent leur estime si je suis fidèle à mes promesses ; que je sois déshonoré et méprisé si j'y manque."
 ];
 const bookOrnament='<div class="book-ornament" aria-hidden="true">❦ ───── ⚕ ───── ❦</div>';
+function compareBookReports(a,b){
+ return String(a.subcategory||'').localeCompare(String(b.subcategory||''),'fr')
+  || num(a.sort_order)-num(b.sort_order)
+  || a.title.localeCompare(b.title,'fr')
+  || String(a.id).localeCompare(String(b.id));
+}
+function bookReportGroup(report){
+ return bookReports.filter(r=>r.category_id===report.category_id && (r.subcategory||'')===(report.subcategory||'')).sort(compareBookReports);
+}
 function bookPages(){return [{type:'oath'},...bookReports.filter(r=>bookCategories.some(c=>c.id===r.category_id)).sort((a,b)=>{
  const ca=bookCategories.findIndex(c=>c.id===a.category_id),cb=bookCategories.findIndex(c=>c.id===b.category_id);
- return ca-cb || a.subcategory.localeCompare(b.subcategory,'fr') || a.sort_order-b.sort_order || a.title.localeCompare(b.title,'fr');
+ return ca-cb || compareBookReports(a,b);
 })];}
 async function loadBook(){
- if(bookBusy||!currentUser)return;
+ if(bookBusy||bookOrderSaving||!currentUser)return;
  bookBusy=true;$('bookStatus').textContent='Ouverture de ton carnet…';
  try{
   const init=await db.rpc('ensure_personal_consultation_notebook',{p_owner_id:currentUser.id});
@@ -2256,7 +2274,7 @@ async function loadBook(){
   bookCategories=cats.data||[];bookReports=reports.data||[];bookLoaded=true;
   bookPage=Math.min(bookPage,bookPages().length-1);renderBook();
   $('bookStatus').textContent=bookReports.length+' rapports · '+bookCategories.length+' intercalaires · carnet personnel';
- }catch(e){$('bookStatus').textContent='Chargement impossible. Clique sur Actualiser le carnet.';dbError(e);}finally{bookBusy=false;}
+ }catch(e){$('bookStatus').textContent='Chargement impossible. Clique sur Actualiser le carnet.';dbError(e);}finally{bookBusy=false;renderBookIndex();}
 }
 
 // Les réponses restent propres à la consultation en cours, sans modifier le modèle partagé.
@@ -2409,15 +2427,52 @@ function renderBook(){
 }
 function renderBookIndex(){
  const term=$('bookSearch').value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+ const opened=new Set(Array.from($('bookIndex').querySelectorAll('details[open]'),el=>el.dataset.bookCategory));
  const pages=bookPages();
  $('bookIndex').innerHTML='<button class="book-tab" data-page="0">⚕ Serment des médecins</button>'+bookCategories.map(c=>{
   const list=pages.map((r,i)=>({...r,page:i})).filter(r=>r.category_id===c.id && [r.title,r.subcategory,r.body].join(' ').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().includes(term));
   if(!list.length)return '';
-  return '<details class="book-divider"'+(term||list.some(r=>r.page===bookPage)?' open':'')+'><summary>'+esc(c.name)+' <small>'+list.length+'</small></summary>'+[...new Set(list.map(r=>r.subcategory))].map(sub=>'<div class="book-subtab">'+esc(sub||'Général')+'</div>'+list.filter(r=>r.subcategory===sub).map(r=>'<button class="book-tab '+(r.page===bookPage?'selected':'')+'" data-page="'+r.page+'">'+esc(r.title)+'</button>').join('')).join('')+'</details>';
+  return '<details class="book-divider" data-book-category="'+esc(c.id)+'"'+(term||opened.has(c.id)||list.some(r=>r.page===bookPage)?' open':'')+'><summary>'+esc(c.name)+' <small>'+list.length+'</small></summary>'+[...new Set(list.map(r=>r.subcategory))].map(sub=>
+   '<div class="book-subtab">'+esc(sub||'Général')+'</div>'+list.filter(r=>r.subcategory===sub).map(r=>{
+    const group=bookReportGroup(r),position=group.findIndex(item=>item.id===r.id);
+    const moves=canEditBook()?'<span class="book-report-moves">'+[-1,1].map(direction=>{
+     const label=(direction<0?'Monter':'Descendre')+' le rapport « '+r.title+' »';
+     const disabled=bookOrderSaving||bookBusy||bookTurning||!!term||position+direction<0||position+direction>=group.length;
+     return '<button type="button" class="book-report-move" data-book-move="'+direction+'" data-report-id="'+esc(r.id)+'" aria-label="'+esc(label)+'" title="'+esc(term?'Efface la recherche pour changer l’ordre des rapports':label)+'"'+(disabled?' disabled':'')+'>'+ (direction<0?'↑':'↓')+'</button>';
+    }).join('')+'</span>':'';
+    return '<div class="book-index-row"><button class="book-tab '+(r.page===bookPage?'selected':'')+'" data-page="'+r.page+'">'+esc(r.title)+'</button>'+moves+'</div>';
+   }).join('')
+  ).join('')+'</details>';
  }).join('');
 }
+async function moveBookReport(reportId,direction){
+ if(!canEditBook()||bookOrderSaving||bookBusy||bookTurning||![-1,1].includes(direction)||$('bookSearch').value.trim())return;
+ const report=bookReports.find(r=>r.id===reportId);if(!report)return;
+ const group=bookReportGroup(report),from=group.findIndex(r=>r.id===reportId),to=from+direction;
+ if(to<0||to>=group.length)return;
+ const selectedId=bookPages()[bookPage]?.id;
+ [group[from],group[to]]=[group[to],group[from]];
+ bookOrderSaving=true;renderBookIndex();$('bookStatus').textContent='Enregistrement de l’ordre des rapports…';
+ try{
+  const {data,error}=await db.rpc('reorder_personal_consultation_reports',{p_report_ids:group.map(r=>r.id)});
+  if(error)throw error;
+  if(!Array.isArray(data)||data.length!==group.length)throw new Error('L’ordre n’a pas pu être confirmé. Actualise le carnet.');
+  const ranks=new Map(data.map(r=>[r.report_id,r.report_sort_order]));
+  if(group.some(r=>!ranks.has(r.id)))throw new Error('La liste des rapports a changé. Actualise le carnet.');
+  bookReports.forEach(r=>{if(ranks.has(r.id))r.sort_order=ranks.get(r.id);});
+  if(selectedId)bookPage=bookPages().findIndex(r=>r.id===selectedId);
+  renderBook();
+  $('bookStatus').textContent=bookReports.length+' rapports · '+bookCategories.length+' intercalaires · ordre personnel enregistré';
+  toast('Ordre des rapports enregistré dans ton carnet.');
+ }catch(e){
+  $('bookStatus').textContent='Déplacement non confirmé. Actualise le carnet avant de réessayer.';
+  dbError(e);
+ }finally{
+  bookOrderSaving=false;renderBookIndex();
+ }
+}
 async function turnBook(next){
- if(bookTurning||!bookLoaded)return;
+ if(bookTurning||bookOrderSaving||!bookLoaded)return;
  next=Math.max(-1,Math.min(bookPages().length-1,next));if(next===bookPage)return;
  bookTurning=true;
  const leaf=$('bookLeaf'),forward=next>bookPage;
@@ -2429,7 +2484,7 @@ async function turnBook(next){
  if(!matchMedia('(prefers-reduced-motion: reduce)').matches){
   await leaf.animate([{transform:'rotateY('+(forward?'':'-')+'85deg)',opacity:.4},{transform:'rotateY(0deg)',opacity:1}],{duration:250,easing:'ease-out'}).finished;
  }
- bookTurning=false;
+ bookTurning=false;renderBookIndex();
 }
 let bookTurning=false;
 
@@ -2475,7 +2530,11 @@ $('bookReset').addEventListener('click',()=>{
  toast('Tes réponses de ce rapport ont été effacées.');
 });
 $('bookSearch').addEventListener('input',renderBookIndex);
-$('bookIndex').addEventListener('click',e=>{const b=e.target.closest('[data-page]');if(b)turnBook(Number(b.dataset.page));});
+$('bookIndex').addEventListener('click',e=>{
+ const move=e.target.closest('[data-book-move]');
+ if(move){e.preventDefault();if(!move.disabled)moveBookReport(move.dataset.reportId,Number(move.dataset.bookMove));return;}
+ const b=e.target.closest('[data-page]');if(b)turnBook(Number(b.dataset.page));
+});
 $('bookCover').addEventListener('click',()=>turnBook(0));
 $('bookPrev').addEventListener('click',()=>turnBook(bookPage-1));
 $('bookNext').addEventListener('click',()=>turnBook(bookPage+1));
@@ -2489,6 +2548,10 @@ $('bookSaveForm').addEventListener('submit',async e=>{
  const id=$('bookEditor').dataset.reportId;
  const record={title:$('bookTitleInput').value.trim(),subcategory:$('bookSubInput').value.trim(),body:cleanBookReportBody(bookEditorBody()),category_id:$('bookCatInput').value,updated_at:new Date().toISOString()};
  if(!record.title||!record.category_id)return;
+ const previous=bookReports.find(r=>r.id===id);
+ if(!previous||previous.category_id!==record.category_id||(previous.subcategory||'')!==record.subcategory){
+  record.sort_order=Math.max(0,...bookReports.filter(r=>r.id!==id&&r.category_id===record.category_id&&(r.subcategory||'')===record.subcategory).map(r=>num(r.sort_order)))+10;
+ }
  if(!$('bookClinicalInput').value.trim()&&!$('bookCareInput').value.trim()){toast('Renseigne au moins une partie du rapport.');return;}
  $('bookSave').disabled=true;
  try{
@@ -2595,7 +2658,7 @@ function renderAdminNotebook(){
  const ownerId=$('adminNotebookUser').value;
  const user=adminNotebookUsers.find(u=>u.id===ownerId);
  const grouped=adminNotebookCategories.map(cat=>{
-  const reports=adminNotebookReports.filter(r=>r.category_id===cat.id).sort((a,b)=>a.sort_order-b.sort_order||a.title.localeCompare(b.title,'fr'));
+  const reports=adminNotebookReports.filter(r=>r.category_id===cat.id).sort(compareBookReports);
   if(!reports.length)return '';
   return '<details class="admin-notebook-group" open><summary>'+esc(cat.name)+' <small>'+reports.length+'</small></summary>'+
     reports.map(r=>'<button type="button" class="admin-notebook-link '+(adminNotebookSelected===r.id?'selected':'')+'" data-admin-report="'+esc(r.id)+'">'+esc(r.title)+'</button>').join('')+
