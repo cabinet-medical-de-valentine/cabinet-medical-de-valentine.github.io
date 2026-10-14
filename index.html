@@ -3219,7 +3219,13 @@ $('navigationSave').addEventListener('click',async()=>{
     syncMovementTypes();
     const current=$("mvResource").value;
     const withdrawal=$("mvType").value==="RETRAIT_STOCK";
-    const resources=activeResources().filter(r=>r.kind==="ingredient" || state.recipes.some(rc=>rc.productId===r.id)).filter(r=>!withdrawal||state.recipes.some(rc=>rc.productId===r.id));
+    const withdrawalNames=new Set(["KIT DE SOIN","SERINGUE VIVIFIANTE"]);
+    const resources=activeResources()
+      .filter(r=>r.kind==="ingredient" || state.recipes.some(rc=>rc.productId===r.id))
+      .filter(r=>!withdrawal || (
+        state.recipes.some(rc=>rc.productId===r.id) &&
+        withdrawalNames.has(String(r.name||"").trim().toLocaleUpperCase("fr-FR"))
+      ));
     $("mvResource").innerHTML=resources.map(r=>`<option value="${esc(r.id)}">${esc(String(r.name||"").toLocaleUpperCase("fr-FR"))}</option>`).join("")+
       (withdrawal?"":'<option value="__OTHER__">Autre (indiquer le motif dans la note ci-dessous)</option>');
     if(resources.some(r=>r.id===current)||(!withdrawal&&current==="__OTHER__"))$("mvResource").value=current;
@@ -4396,8 +4402,13 @@ $('navigationSave').addEventListener('click',async()=>{
     const note=type==="RETRAIT_STOCK"?"à remettre à la banque du cabinet":$("mvNote").value.trim();
     if((!isOther&&!resource)||qty<=0){toast("Indique une ressource et une quantité valide.");return;}
     if(isOther&&!note){toast("Pour « Autre », indique obligatoirement le motif dans la note.");$("mvNote").focus();return;}
-    if(type==="RETRAIT_STOCK"&&(!resource||!state.recipes.some(rc=>rc.productId===resource.id)||!Number.isInteger(qty))){
-      toast("Choisis un article de recette et une quantité entière.");return;
+    if(type==="RETRAIT_STOCK"&&(
+      !resource||
+      !state.recipes.some(rc=>rc.productId===resource.id)||
+      !["KIT DE SOIN","SERINGUE VIVIFIANTE"].includes(String(resource.name||"").trim().toLocaleUpperCase("fr-FR"))||
+      !Number.isInteger(qty)
+    )){
+      toast("Pour un retrait du stock, choisis KIT DE SOIN ou SERINGUE VIVIFIANTE avec une quantité entière.");return;
     }
     const removes=["SORTIE","VENTE","CORRECTION_MOINS","RETRAIT_STOCK"].includes(type);
     if(resource&&removes&&num(resource.stock)<qty){toast("Stock insuffisant pour cette sortie.");return;}
